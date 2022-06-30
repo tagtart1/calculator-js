@@ -32,35 +32,36 @@ function operate(operator, num1, num2) {
 }
 
 function updateDisplayOperator(e) {
-    if(displayValue != '' && firstValue != '') {
+    if(displayValue != '' && firstValue != '') {  //assures only 1 pair of numbers are evaluated at a time incase user wants to chain the answer
         displayValue = operate(currentOperator,+firstValue,+displayValue);
         topDisplay.textContent = `${displayValue} ${e.target.textContent}`;
         bottomDisplay.textContent = displayValue;
+        
     }
     currentOperator = e.target.textContent;
-    operatorSelected = true;
-    
+    //operatorSelected = true;
+    justEvaluated = false;
     topDisplay.textContent = `${displayValue} ${e.target.textContent}`;
     firstValue = displayValue;
     displayValue = '';
     
 }
-
+//All += operations deal with strings and not ints
 function updateDisplayNum(e) {
     
-    if(!operatorSelected) {
-        if (justEvaluated) {
+   // if(!operatorSelected) {
+        if (justEvaluated) { //if the equal sign was pressed just reset the calculator
             clearCalc();
             justEvaluated = false;
         }
-        displayValue += e.target.textContent;
+        displayValue += e.target.textContent; 
         bottomDisplay.textContent = displayValue;
-    }
-    else {
-      operatorSelected = false;
-      displayValue += e.target.textContent;
-      bottomDisplay.textContent = displayValue;
-    }
+   // }
+    // else {
+    //   operatorSelected = false;
+    //   displayValue += e.target.textContent;
+    //   bottomDisplay.textContent = displayValue;
+    // }
 }
 
 function handleEvaluation(e) {
@@ -86,14 +87,16 @@ function clearCalc() {  //full reset
 let firstValue ='';
 let displayValue ='';
 let currentOperator='';
-let operatorSelected = false;
+//let operatorSelected = false;
 let justEvaluated = false;
+
 const bottomDisplay = document.querySelector('.bottom-display');
 const topDisplay = document.querySelector('.top-display');
 const numberBtns = document.querySelectorAll('.number');
 const operatorBtns = document.querySelectorAll('.operator');
 const equals = document.querySelector('.equal');
 const clear = document.querySelector('.clear');
+
 equals.addEventListener('click', handleEvaluation);
 clear.addEventListener('click', clearCalc)
 operatorBtns.forEach(btn => btn.addEventListener('click', updateDisplayOperator));
