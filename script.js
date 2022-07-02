@@ -29,6 +29,7 @@ function operate(operator, num1, num2) {
         case'÷': return divide(num1,num2);
     }
     currentOperator='';
+    // displayHasDecimal = false;  <- test this tomorrow
 }
 
 function updateDisplayOperator(e) {
@@ -36,32 +37,45 @@ function updateDisplayOperator(e) {
         displayValue = operate(currentOperator,+firstValue,+displayValue);
         topDisplay.textContent = `${displayValue} ${e.target.textContent}`;
         bottomDisplay.textContent = displayValue;
-        
+        displayHasDecimal = false;
+        firstValue ='';
     }
     currentOperator = e.target.textContent;
-    //operatorSelected = true;
+    operatorSelected = true;
     justEvaluated = false;
     topDisplay.textContent = `${displayValue} ${e.target.textContent}`;
-    firstValue = displayValue;
-    displayValue = '';
+    
     
 }
 //All += operations deal with strings and not ints
 function updateDisplayNum(e) {
-    
-   // if(!operatorSelected) {
-        if (justEvaluated) { //if the equal sign was pressed just reset the calculator
+    if (operatorSelected) {
+        firstValue = displayValue;
+        displayValue = '';
+        operatorSelected = false;
+        displayHasDecimal = false;
+    }
+
+ 
+   
+   if (justEvaluated) { //if the equal sign was pressed just reset the calculator
             clearCalc();
             justEvaluated = false;
         }
-        displayValue += e.target.textContent; 
-        bottomDisplay.textContent = displayValue;
-   // }
-    // else {
-    //   operatorSelected = false;
-    //   displayValue += e.target.textContent;
-    //   bottomDisplay.textContent = displayValue;
-    // }
+    if (e.target.textContent == '.' && !displayHasDecimal) {         //if and else if handles decimal 
+            displayHasDecimal = true;
+            displayValue += e.target.textContent ;
+            bottomDisplay.textContent = displayValue;
+            return;
+    }else if (e.target.textContent == '.' && displayHasDecimal) {
+        return;
+    }
+    
+    displayValue += e.target.textContent ;
+    bottomDisplay.textContent = displayValue;
+    
+     
+       
 }
 
 function handleEvaluation(e) {
@@ -76,6 +90,7 @@ function handleEvaluation(e) {
 }
 
 function clearCalc() {  //full reset
+    displayHasDecimal = false;
     displayValue='';
     firstValue='';
     currentOperator=''
@@ -84,10 +99,26 @@ function clearCalc() {  //full reset
     operatorSelected = false;
 }
 
+function handleDelete() {
+    if (operatorSelected) {
+        firstValue = displayValue;
+        operatorSelected = false;
+    }
+    removeLastChar = displayValue.slice(0, displayValue.length -1);
+
+    deletedChar = displayValue.slice(displayValue.length -1);
+    if (deletedChar == '.') displayHasDecimal = false;
+    
+    displayValue = removeLastChar;
+    bottomDisplay.textContent = displayValue;
+    
+}
+
+let displayHasDecimal = false;
 let firstValue ='';
 let displayValue ='';
 let currentOperator='';
-//let operatorSelected = false;
+let operatorSelected = false;
 let justEvaluated = false;
 
 const bottomDisplay = document.querySelector('.bottom-display');
@@ -95,9 +126,13 @@ const topDisplay = document.querySelector('.top-display');
 const numberBtns = document.querySelectorAll('.number');
 const operatorBtns = document.querySelectorAll('.operator');
 const equals = document.querySelector('.equal');
+const decimal = document.querySelector('.decimal');
 const clear = document.querySelector('.clear');
+const del = document.querySelector('.delete');
 
+del.addEventListener('click', handleDelete);
+decimal.addEventListener('click', updateDisplayNum);
 equals.addEventListener('click', handleEvaluation);
-clear.addEventListener('click', clearCalc)
+clear.addEventListener('click', clearCalc);
 operatorBtns.forEach(btn => btn.addEventListener('click', updateDisplayOperator));
 numberBtns.forEach(btn => btn.addEventListener('click', updateDisplayNum));
