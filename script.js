@@ -18,7 +18,7 @@ function divide(num1, num2) {
 }
 
 function operate(operator, num1, num2) {
-
+    
     switch(operator) {
         case '+': return add(num1, num2);
         
@@ -29,12 +29,24 @@ function operate(operator, num1, num2) {
         case'÷': return divide(num1,num2);
     }
     currentOperator='';
-    // displayHasDecimal = false;  <- test this tomorrow
+   
 }
 
 function updateDisplayOperator(e) {
+    if (displayValue =="Don't You Dare...") return;
+    if (topDisplay.textContent == '');
     if(displayValue != '' && firstValue != '') {  //assures only 1 pair of numbers are evaluated at a time incase user wants to chain the answer
+        
         displayValue = operate(currentOperator,+firstValue,+displayValue);
+        if (displayValue =="Don't You Dare...")  {
+            topDisplay.textContent = '';
+            bottomDisplay.textContent = displayValue;
+            displayHasDecimal = false;
+            firstValue ='';
+            displayValue='0';
+            return;
+        }
+        if (+displayValue < 0) displayIsNegative = true;
         topDisplay.textContent = `${displayValue} ${e.target.textContent}`;
         bottomDisplay.textContent = displayValue;
         displayHasDecimal = false;
@@ -49,6 +61,7 @@ function updateDisplayOperator(e) {
 }
 //All += operations deal with strings and not ints
 function updateDisplayNum(e) {
+   
     if (operatorSelected) {
         firstValue = displayValue;
         displayValue = '';
@@ -56,7 +69,7 @@ function updateDisplayNum(e) {
         displayHasDecimal = false;
     }
 
- 
+  
    
    if (justEvaluated) { //if the equal sign was pressed just reset the calculator
             clearCalc();
@@ -71,8 +84,15 @@ function updateDisplayNum(e) {
         return;
     }
     
+    if (displayValue == '0')  {
+        displayValue = e.target.textContent ;
+        bottomDisplay.textContent = displayValue;
+        
+    }
+    else {
     displayValue += e.target.textContent ;
     bottomDisplay.textContent = displayValue;
+    }
     
      
        
@@ -82,7 +102,7 @@ function handleEvaluation(e) {
     if (displayValue == '' || firstValue =='' ) return;
     topDisplay.textContent += ` ${displayValue} =`;
    displayValue = operate(currentOperator, +firstValue, +displayValue);
-  
+   if (+displayValue < 0) displayIsNegative = true;
    bottomDisplay.textContent = displayValue;
    currentOperator='';
    firstValue = '';
@@ -90,8 +110,9 @@ function handleEvaluation(e) {
 }
 
 function clearCalc() {  //full reset
+    displayIsNegative = false;
     displayHasDecimal = false;
-    displayValue='';
+    displayValue='0';
     firstValue='';
     currentOperator=''
     topDisplay.textContent='';
@@ -108,15 +129,28 @@ function handleDelete() {
 
     deletedChar = displayValue.slice(displayValue.length -1);
     if (deletedChar == '.') displayHasDecimal = false;
-    
+    if (deletedChar=='-') displayIsNegative = false;
     displayValue = removeLastChar;
     bottomDisplay.textContent = displayValue;
     
 }
 
+function handleNegative() {
+    if (displayIsNegative) {
+        displayValue = displayValue.substring(1);
+        bottomDisplay.textContent = displayValue;
+        displayIsNegative = false;
+    }
+    else {
+        displayValue = `-${displayValue}`
+        bottomDisplay.textContent = displayValue;
+        displayIsNegative = true;
+    }
+}
+let displayIsNegative = false;
 let displayHasDecimal = false;
 let firstValue ='';
-let displayValue ='';
+let displayValue ='0';
 let currentOperator='';
 let operatorSelected = false;
 let justEvaluated = false;
@@ -127,9 +161,11 @@ const numberBtns = document.querySelectorAll('.number');
 const operatorBtns = document.querySelectorAll('.operator');
 const equals = document.querySelector('.equal');
 const decimal = document.querySelector('.decimal');
+const negative = document.querySelector('.negative');
 const clear = document.querySelector('.clear');
 const del = document.querySelector('.delete');
 
+negative.addEventListener('click', handleNegative);
 del.addEventListener('click', handleDelete);
 decimal.addEventListener('click', updateDisplayNum);
 equals.addEventListener('click', handleEvaluation);
