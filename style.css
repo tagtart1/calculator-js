@@ -125,5 +125,36 @@ button {
     
 }
 
+.operator:hover,
+.decimal:hover,
+.negative:hover,
+.clear:hover,
+.delete:hover {
+    background-color: #9ec8f0;
+}
+
+.equal:hover {
+    background-color: #4a85c0;
+}
+.equal:active{
+    background-color: #4377aa;
+}
+
+.operator:active,
+.decimal:active,
+.negative:active,
+.clear:active,
+.delete:active {
+    background-color: #8cb3d8;
+}
+
+.number:hover {
+    background-color: #c5ddf8;
+}
+
+.number:active {
+    background-color: #bad1ec;
+}
+
 
 

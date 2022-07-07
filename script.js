@@ -38,10 +38,14 @@ function updateDisplayOperator(e) {
     if(displayValue != '' && firstValue != '') {  //assures only 1 pair of numbers are evaluated at a time incase user wants to chain the answer
         
         displayValue = operate(currentOperator,+firstValue,+displayValue);
+        if (displayValue.toString().length > maxDisplayLength) {
+            displayValue = displayValue.toPrecision(8);
+         }
         if (displayValue =="Don't You Dare...")  {
             topDisplay.textContent = '';
             bottomDisplay.textContent = displayValue;
             displayHasDecimal = false;
+            displayIsNegative = false;
             firstValue ='';
             displayValue='0';
             return;
@@ -61,7 +65,7 @@ function updateDisplayOperator(e) {
 }
 //All += operations deal with strings and not ints
 function updateDisplayNum(e) {
-   
+   if (displayValue.length >= maxDisplayLength && !operatorSelected) return;  //max num lenght on the line
     if (operatorSelected) {
         firstValue = displayValue;
         displayValue = '';
@@ -69,8 +73,6 @@ function updateDisplayNum(e) {
         displayHasDecimal = false;
     }
 
-  
-   
    if (justEvaluated) { //if the equal sign was pressed just reset the calculator
             clearCalc();
             justEvaluated = false;
@@ -89,10 +91,17 @@ function updateDisplayNum(e) {
         bottomDisplay.textContent = displayValue;
         
     }
+    else if(displayValue=='-0') {   //replaces the 0 with whatever number entered
+        displayValue = `-${e.target.textContent}`;
+        bottomDisplay.textContent = displayValue;
+    }
     else {
     displayValue += e.target.textContent ;
     bottomDisplay.textContent = displayValue;
     }
+
+    if (+displayValue < 0) displayIsNegative = true;
+    else displayIsNegative = false;
     
      
        
@@ -101,8 +110,12 @@ function updateDisplayNum(e) {
 function handleEvaluation(e) {
     if (displayValue == '' || firstValue =='' ) return;
     topDisplay.textContent += ` ${displayValue} =`;
-   displayValue = operate(currentOperator, +firstValue, +displayValue);
+    displayValue = operate(currentOperator, +firstValue, +displayValue);
+   if (displayValue.toString().length > maxDisplayLength) {
+      displayValue = displayValue.toPrecision(8);
+   }
    if (+displayValue < 0) displayIsNegative = true;
+   
    bottomDisplay.textContent = displayValue;
    currentOperator='';
    firstValue = '';
@@ -154,6 +167,8 @@ let displayValue ='0';
 let currentOperator='';
 let operatorSelected = false;
 let justEvaluated = false;
+
+const maxDisplayLength = 12;
 
 const bottomDisplay = document.querySelector('.bottom-display');
 const topDisplay = document.querySelector('.top-display');
