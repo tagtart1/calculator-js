@@ -33,24 +33,17 @@ function operate(operator, num1, num2) {
 }
 
 function updateDisplayOperator(e) {
+    
     if (displayValue =="Don't You Dare...") return;
-    if (topDisplay.textContent == '');
-    if(displayValue != '' && firstValue != '') {  //assures only 1 pair of numbers are evaluated at a time incase user wants to chain the answer
+    //if (topDisplay.textContent == '');
+    if(displayValue !== '' && firstValue !== '') {  //assures only 1 pair of numbers are evaluated at a time incase user wants to chain the answer
         
         displayValue = operate(currentOperator,+firstValue,+displayValue);
-        if (displayValue.toString().length > maxDisplayLength) {
-            displayValue = displayValue.toPrecision(8);
-         }
-        if (displayValue =="Don't You Dare...")  {
-            topDisplay.textContent = '';
-            bottomDisplay.textContent = displayValue;
-            displayHasDecimal = false;
-            displayIsNegative = false;
-            firstValue ='';
-            displayValue='0';
-            return;
-        }
+       
+        if(dividedByZero()) return;
+
         if (+displayValue < 0) displayIsNegative = true;
+        displayValue =  handleLargeNumbers() ? displayValue : +displayValue;
         topDisplay.textContent = `${displayValue} ${e.target.textContent}`;
         bottomDisplay.textContent = displayValue;
         displayHasDecimal = false;
@@ -59,6 +52,8 @@ function updateDisplayOperator(e) {
     currentOperator = e.target.textContent;
     operatorSelected = true;
     justEvaluated = false;
+   
+    displayValue =  handleLargeNumbers() ? displayValue : +displayValue;
     topDisplay.textContent = `${displayValue} ${e.target.textContent}`;
     
     
@@ -108,15 +103,15 @@ function updateDisplayNum(e) {
 }
 
 function handleEvaluation(e) {
-    if (displayValue == '' || firstValue =='' ) return;
+    
+
+    if (displayValue == null || firstValue == null ) return;
     topDisplay.textContent += ` ${displayValue} =`;
     displayValue = operate(currentOperator, +firstValue, +displayValue);
-   if (displayValue.toString().length > maxDisplayLength) {
-      displayValue = displayValue.toPrecision(8);
-   }
+  
    if (+displayValue < 0) displayIsNegative = true;
-   
-   bottomDisplay.textContent = displayValue;
+  
+   bottomDisplay.textContent =  handleLargeNumbers() ? displayValue : +displayValue;
    currentOperator='';
    firstValue = '';
    justEvaluated = true; //causes the answer to not be manipulated unless an operation happens directly after
@@ -150,7 +145,7 @@ function handleDelete() {
 
 function handleNegative() {
     if (displayIsNegative) {
-        displayValue = displayValue.substring(1);
+        displayValue = displayValue.toString().substring(1);
         bottomDisplay.textContent = displayValue;
         displayIsNegative = false;
     }
@@ -160,6 +155,37 @@ function handleNegative() {
         displayIsNegative = true;
     }
 }
+
+function handleLargeNumbers() {
+    if(displayValue == "Don't You Dare...") return true;
+    if (displayValue.toString().length > maxDisplayLength) {
+        if (displayValue != null)displayValue = displayValue.toPrecision(8); 
+                                                        /* Fixes a weird way on how leading 0's generate on decimal divsion without shortening
+                                                        and also shortens large numbers down to exponential value */
+        if (+displayValue > maxInteger) {
+            
+            return true;
+        }
+        else {
+            return false;
+        }
+   }
+}
+
+function dividedByZero() {
+    if (displayValue =="Don't You Dare...")  {
+        topDisplay.textContent = '';
+        bottomDisplay.textContent = displayValue;
+        displayHasDecimal = false;
+        displayIsNegative = false;
+        firstValue ='';
+        displayValue='0';
+        return true;
+    }
+    else return false;
+}
+
+
 let displayIsNegative = false;
 let displayHasDecimal = false;
 let firstValue ='';
@@ -169,6 +195,7 @@ let operatorSelected = false;
 let justEvaluated = false;
 
 const maxDisplayLength = 12;
+const maxInteger = 999999999999 // 12 length
 
 const bottomDisplay = document.querySelector('.bottom-display');
 const topDisplay = document.querySelector('.top-display');
