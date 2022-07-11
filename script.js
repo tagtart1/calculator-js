@@ -33,6 +33,13 @@ function operate(operator, num1, num2) {
 }
 
 function updateDisplayOperator(e) {
+    let inputValue = '';
+    if (typeof e === 'object') {                    //if e is an event object then we take the t
+        inputValue = e.target.textContent;
+    }
+    else inputValue = e;
+    
+
     
     if (displayValue =="Don't You Dare...") return;
     //if (topDisplay.textContent == '');
@@ -44,23 +51,30 @@ function updateDisplayOperator(e) {
 
         if (+displayValue < 0) displayIsNegative = true;
         displayValue =  handleLargeNumbers() ? displayValue : +displayValue;
-        topDisplay.textContent = `${displayValue} ${e.target.textContent}`;
+        topDisplay.textContent = `${displayValue} ${inputValue}`;
         bottomDisplay.textContent = displayValue;
         displayHasDecimal = false;
         firstValue ='';
     }
-    currentOperator = e.target.textContent;
+    currentOperator = inputValue;
     operatorSelected = true;
     justEvaluated = false;
    
     displayValue =  handleLargeNumbers() ? displayValue : +displayValue;
-    topDisplay.textContent = `${displayValue} ${e.target.textContent}`;
+    topDisplay.textContent = `${displayValue} ${inputValue}`;
     
     
 }
 //All += operations deal with strings and not ints
 function updateDisplayNum(e) {
-   if (displayValue.length >= maxDisplayLength && !operatorSelected) return;  //max num lenght on the line
+    let inputValue = '';
+    if (typeof e === 'object') {                    //if e is an event object then we take the t
+        inputValue = e.target.textContent;
+    }
+    else inputValue = e;
+    
+    if (displayValue.length >= maxDisplayLength && !operatorSelected) return;  //max num lenght on the line
+
     if (operatorSelected) {
         firstValue = displayValue;
         displayValue = '';
@@ -72,40 +86,29 @@ function updateDisplayNum(e) {
             clearCalc();
             justEvaluated = false;
         }
-    if (e.target.textContent == '.' && !displayHasDecimal) {         //if and else if handles decimal 
+    if (inputValue == '.' && !displayHasDecimal) {         //if and else if handles decimal 
             displayHasDecimal = true;
-            displayValue += e.target.textContent ;
+            displayValue += inputValue ;
             bottomDisplay.textContent = displayValue;
             return;
-    }else if (e.target.textContent == '.' && displayHasDecimal) {
+    }else if (inputValue == '.' && displayHasDecimal) {
         return;
     }
     
-    if (displayValue == '0')  {
-        displayValue = e.target.textContent ;
-        bottomDisplay.textContent = displayValue;
-        
-    }
-    else if(displayValue=='-0') {   //replaces the 0 with whatever number entered
-        displayValue = `-${e.target.textContent}`;
-        bottomDisplay.textContent = displayValue;
-    }
-    else {
-    displayValue += e.target.textContent ;
-    bottomDisplay.textContent = displayValue;
-    }
+    handleInitialZero(inputValue);
+   
 
     if (+displayValue < 0) displayIsNegative = true;
-    else displayIsNegative = false;
-    
-     
+    else displayIsNegative = false; 
        
 }
+
+
 
 function handleEvaluation(e) {
     
 
-    if (displayValue == null || firstValue == null ) return;
+    if (displayValue == '' || firstValue == '' ) return;
     topDisplay.textContent += ` ${displayValue} =`;
     displayValue = operate(currentOperator, +firstValue, +displayValue);
   
@@ -185,6 +188,53 @@ function dividedByZero() {
     else return false;
 }
 
+function handleInitialZero(inputValue) {
+    if (displayValue == '0')  {  //replaces the initial 0 with whatever number entered
+        displayValue = inputValue ;
+        bottomDisplay.textContent = displayValue;
+        
+    }
+
+    else if(displayValue=='-0') {   //replaces the initial 0 with whatever number entered
+        displayValue = `-${inputValue}`;
+        bottomDisplay.textContent = displayValue;
+    }
+    else {
+    displayValue += inputValue ;
+    bottomDisplay.textContent = displayValue;
+    }
+}
+
+function handleKeyboardInput(e) {
+    switch(e.key) {
+       case'Backspace': handleDelete(); break;
+    
+       case'.': updateDisplayNum('.'); break;
+       case '0' : updateDisplayNum('0'); break;
+       case '1': updateDisplayNum('1'); break;
+       case '2' : updateDisplayNum('2'); break;
+       case '3': updateDisplayNum('3'); break;
+       case '4' : updateDisplayNum('4'); break;
+       case '5': updateDisplayNum('5');  break;
+       case '6' : updateDisplayNum('6'); break;
+       case '7': updateDisplayNum('7'); break;
+       case '8' : updateDisplayNum('8'); break;
+       case '9': updateDisplayNum('9'); break;
+
+       case '+' : updateDisplayOperator('+'); break;
+       case '-' : updateDisplayOperator('-'); break;
+       case '*' :
+       case 'x' : updateDisplayOperator('x'); break;
+       case '/' :updateDisplayOperator('÷'); break;
+
+       case '=' : handleEvaluation(); break;
+       case 'Enter': e.stopPropagation();
+                     e.preventDefault();
+                     handleEvaluation(); break;
+
+    }
+}
+
 
 let displayIsNegative = false;
 let displayHasDecimal = false;
@@ -206,6 +256,10 @@ const decimal = document.querySelector('.decimal');
 const negative = document.querySelector('.negative');
 const clear = document.querySelector('.clear');
 const del = document.querySelector('.delete');
+
+
+document.addEventListener('keydown', handleKeyboardInput)
+
 
 negative.addEventListener('click', handleNegative);
 del.addEventListener('click', handleDelete);
